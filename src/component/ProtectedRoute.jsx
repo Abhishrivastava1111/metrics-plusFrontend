@@ -1,26 +1,21 @@
 import React from "react";
 import { useDispatch, useSelector } from "react-redux";
-import LoginForm from "./Auth";
 import { Route, Routes } from "react-router-dom";
-import Home from "./Home";
 import { authActions } from "../store/auth-slice";
-import SignUpForm from "../SignUp";
-import Dashboard from "../Dashboard";
-import Landing from "../AdminControllers/Landing";
-import DoctorLanding from "../DoctorControllers/CommonLanding";
-import Error from "../Error";
+import ProjectDetailsPage from "./ProjectDetailsPage";
+import ResponsiveDrawer from "./ResponsiveDrawer";
 
 const ProtectedRoute = () => {
   const dispatch = useDispatch();
   const isLoggedIn = useSelector((state) => state.auth.isLoggedIn);
+  const selectedRole = useSelector((state) => state.auth.role);
 
   if (!isLoggedIn && localStorage.getItem("logicCredentials")) {
-    console.log("Without redux but with local storage");
+    console.log("we are fetchin data from local storage");
 
     var data = JSON.parse(localStorage.getItem("logicCredentials"));
-    var arrOfRoles = data.roles;
 
-    dispatch(authActions.login({ userName: data.userName, role: arrOfRoles }));
+    dispatch(authActions.login({ userName: data.userName, role: data.role }));
     dispatch(authActions.setAccessToken({ accessToken: data.accessToken }));
     dispatch(
       authActions.setRefreshToken({
@@ -28,77 +23,45 @@ const ProtectedRoute = () => {
       })
     );
   }
-  const email = useSelector((state) => state.auth.userName);
-  const roles = useSelector((state) => state.auth.roles);
 
-  console.log(roles);
-  //   console.log(isLoggedIn);
-  //   console.log(email);
-  const DoctorRoutes = (
-    <>
-      <Route path="/" element={<Dashboard element={<DoctorLanding />} />} />
-      <Route path="/about" element={<Home />} />
-      <Route path="/products" element={<Home />} />
-      <Route path="/contact" element={<Home />} />
-      <Route path="/addPatient" element={<SignUpForm />} />
-      <Route
-        path="*"
-        element={<Error message={"Invalid path please check the url"} />}
-      />
-    </>
-  );
   const routesForUnAuthUser = (
     <>
-      <Route path="/" element={<LoginForm />} />
-      <Route path="/signup" element={<SignUpForm />} />
-      <Route path="/about" element={<Home />} />
-      <Route path="/products" element={<Home />} />
-      <Route path="/contact" element={<Home />} />
       <Route
-        path="*"
-        element={<Error message={"Invalid path please check the url"} />}
+        path="/"
+        element={<ResponsiveDrawer element={ProjectDetailsPage} />}
       />
+      <Route path="/projectDetails" element={<ProjectDetailsPage />} />
     </>
   );
 
   const routesForAdmin = (
     <>
-      <Route path="/dashboard" element={<Dashboard />} />
-      <Route path="/" element={<Dashboard element={<Landing />} />} />
-      <Route path="/addUser" element={<SignUpForm />} />
-      <Route path="/about" element={<Home />} />
-      <Route path="/products" element={<Home />} />
-      <Route path="/contact" element={<Home />} />
-      <Route
+      <Route path="/dashboard" element={<ResponsiveDrawer text={"some"} />} />
+      {/* <Route
         path="*"
         element={<Error message={"Invalid path please check the url"} />}
-      />
+      /> */}
     </>
   );
-  const routesForCompounder = (
-    <>
-      <Route path="/" element={<Dashboard />} />
-      <Route path="/addpatient" element={<SignUpForm />} />
-      <Route path="/about" element={<Home />} />
-      <Route path="/products" element={<Home />} />
-      <Route path="/contact" element={<Home />} />
-      <Route
-        path="*"
-        element={<Error message={"Invalid path please check the url"} />}
-      />
-    </>
-  );
-  const routesForPatient = (
-    <>
-      <Route path="/" element={<Dashboard />} />
 
-      <Route path="/about" element={<Home />} />
-      <Route path="/products" element={<Home />} />
-      <Route path="/contact" element={<Home />} />
-      <Route
+  const routesForManager = (
+    <>
+      <Route path="/dashboard" element={<ResponsiveDrawer text={"some"} />} />
+      <Route path="/projectDetails" element={<ProjectDetailsPage />} />
+      {/* <Route
         path="*"
         element={<Error message={"Invalid path please check the url"} />}
-      />
+      /> */}
+    </>
+  );
+
+  const routesForMentee = (
+    <>
+      <Route path="/dashboard" element={<ResponsiveDrawer text={"some"} />} />
+      {/* <Route
+        path="*"
+        element={<Error message={"Invalid path please check the url"} />}
+      /> */}
     </>
   );
 
@@ -106,22 +69,13 @@ const ProtectedRoute = () => {
     if (!isLoggedIn) {
       return routesForUnAuthUser;
     }
-    console.log(selectedRole);
-    if (selectedRole === "" || roles.length == 1) selectedRole = roles[0];
-
     switch (selectedRole) {
-      case "DOCTOR":
-        return DoctorRoutes;
-
       case "ADMIN":
         return routesForAdmin;
-      case "COMPOUNDER":
-        return routesForCompounder;
-      case "PATIENT":
-        return routesForPatient;
-      default:
-        console.log("******&&&&&&&&&&&&");
-        break;
+      case "MENTEE":
+        return routesForMentee;
+      case "MANAGER":
+        return routesForManager;
     }
   };
 

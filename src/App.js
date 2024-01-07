@@ -1,15 +1,19 @@
-
-import  ResponsiveDrawer from "./component/Drawer"
-import './App.css';
-
-
+import ResponsiveDrawer from "./component/ResponsiveDrawer";
+import "./App.css";
+import { BrowserRouter } from "react-router-dom";
+import ProtectedRoute from "./component/ProtectedRoute";
+import { Provider } from "react-redux";
+import store from "./store";
 
 function App() {
   return (
-   
-    <div className="App">
-      <ResponsiveDrawer/>
-    </div>
+    <Provider store={store}>
+      <BrowserRouter>
+        <div className="App">
+          <ProtectedRoute />
+        </div>
+      </BrowserRouter>
+    </Provider>
   );
 }
 
